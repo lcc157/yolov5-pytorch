@@ -1,36 +1,6 @@
-## [YOLO v5](https://github.com/ultralytics/yolov5)在医疗领域中消化内镜目标检测的应用
+## [YOLO v5](https://github.com/ultralytics/yolov5)在光伏电池缺陷检测的应用
 
 ### YOLO v5训练自己数据集详细教程
-
-**Xu Jing**
-
-------
-:fire: 由于官方新版YOLO v5的backbone和部分参数调整，导致很多小伙伴下载最新官方预训练模型不可用，这里提供原版的YOLO v5的预训练模型的百度云盘下载地址
-
-链接：https://pan.baidu.com/s/1SDwp6I_MnRLK45QdB3-yNw 
-提取码：423j
-
-------
-
-+ YOLOv4还没有退热，YOLOv5已经发布！
-
-+ 6月9日，Ultralytics公司开源了YOLOv5，离上一次YOLOv4发布不到50天。而且这一次的YOLOv5是完全基于PyTorch实现的！
-
-+ YOLO v5的主要贡献者是YOLO v4中重点介绍的马赛克数据增强的作者
-
-<a href="https://apps.apple.com/app/id1452689527" target="_blank">
-<img src="readmepic/readme1/82944393-f7644d80-9f4f-11ea-8b87-1a5b04f555f1.jpg" width="1000"></a>
-
-
-
-> 本项目描述了如何基于自己的数据集训练YOLO v5
-
-<img align="center" src="readmepic/readme1/84200349-729f2680-aa5b-11ea-8f9a-604c9e01a658.png" width="1000">
-
-但是YOLO v4的二作提供给我们的信息和官方提供的还是有一些出入：
-
-<img align="center" src="readmepic/readme1/YOLOv4_author2.jpg" width="800">
-
 
 #### 0.环境配置
 
@@ -38,16 +8,14 @@
 
 ```
 # python3.6
-# torch==1.3.0
+# torch==1.4.0
 # torchvision==0.4.1
 
 # git clone yolo v5 repo
-git clone https://github.com/ultralytics/yolov5 # clone repo
-# 下载官方的样例数据（这一步可以省略）
-python3 -c "from yolov5.utils.google_utils import gdrive_download; gdrive_download('1n_oKgR81BJtqk75b00eAjdv03qVCQn2f','coco128.zip')" # download dataset
-cd yolov5
+ https://github.com/DataXujing/YOLO-v5.git # clone repo
+
 # 安装必要的package
-pip3 install -U -r requirements.txt
+pip install -U -r requirements.txt
 ```
 
 #### 1.创建数据集的配置文件`dataset.yaml`
@@ -63,7 +31,7 @@ val: ./datasets/score/images/val/
 nc: 3
 
 # class names
-names: ['QP', 'NY', 'QG']
+names: ['Crack', 'BrokenGate', 'Chipping']
  ```
 
 #### 2.创建标注文件
@@ -101,9 +69,7 @@ def convert(size, box):
 datasets/score/images/train/000000109622.jpg  # image
 datasets/score/labels/train/000000109622.txt  # label
 ```
-如果一个标注文件包含5个person类别（person在coco数据集中是排在第一的类别因此index为0）：
 
-<img width="500" align="center" alt="Screen Shot 2020-04-01 at 11 44 26 AM" src="./readmepic/readme2/pic/78174482-307bb800-740e-11ea-8b09-840693671042.png">
 
 #### 3.组织训练集的目录
 
@@ -115,14 +81,14 @@ datasets/score/labels/train/000000109622.txt  # label
 
 #### 4.选择模型backbone进行模型配置文件的修改
 
-在项目的`./models`文件夹下选择一个需要训练的模型，这里我们选择[yolov5x.yaml](https://github.com/ultralytics/yolov5/blob/master/models/yolov5x.yaml),最大的一个模型进行训练，参考官方README中的[table](https://github.com/ultralytics/yolov5#pretrained-checkpoints),了解不同模型的大小和推断速度。如果你选定了一个模型，那么需要修改模型对应的`yaml`文件
+在项目的`./models`文件夹下选择一个需要训练的模型，这里我们选择[yolov5s.yaml](https://github.com/ultralytics/yolov5/blob/master/models/yolov5s.yaml),最大的一个模型进行训练，参考官方README中的[table](https://github.com/ultralytics/yolov5#pretrained-checkpoints),了解不同模型的大小和推断速度。如果你选定了一个模型，那么需要修改模型对应的`yaml`文件
 
 ```yaml
 
 # parameters
 nc: 3  # number of classes   <------------------  UPDATE to match your dataset
-depth_multiple: 1.33  # model depth multiple
-width_multiple: 1.25  # layer channel multiple
+depth_multiple: 0.75  # model depth multiple
+width_multiple: 0.75  # layer channel multiple
 
 # anchors
 anchors:
@@ -172,26 +138,9 @@ head:
 ```bash
 # Train yolov5x on score for 300 epochs
 
-$ python3 train.py --img-size 640 --batch-size 16 --epochs 300 --data ./data/score.yaml --cfg ./models/score/yolov5x.yaml --weights weights/yolov5x.pt
+$ python train.py --img-size 640 --batch-size 16 --epochs 300 --data ./data/score.yaml --cfg ./models/score/yolov5s.yaml --weights weights/yolov5s.pt
 
 ```
-
-
-#### 6.Visualize
-
-开始训练后，查看`train*.jpg`图片查看训练数据，标签和数据增强，如果你的图像显示标签或数据增强不正确，你应该查看你的数据集的构建过程是否有问题
-
-<img width="1000" align="center" alt="Screen Shot 2020-04-01 at 11 44 26 AM" src="./readmepic/readme2/pic/train_batch0.jpg">
-
-一个训练epoch完成后，查看`test_batch0_gt.jpg`查看batch 0 ground truth的labels
-
-
-<img width="1000" align="center" alt="Screen Shot 2020-04-01 at 11 44 26 AM" src="./readmepic/readme2/pic/test_batch0_gt.jpg">
-
-查看`test_batch0_pred.jpg`查看test batch 0的预测
-
-<img width="1000" align="center" alt="Screen Shot 2020-04-01 at 11 44 26 AM" src="./readmepic/readme2/pic/test_batch0_pred.jpg">
-
 训练的losses和评价指标被保存在Tensorboard和`results.txt`log文件。`results.txt`在训练结束后会被可视化为`results.png`
 
 ```python
@@ -202,10 +151,10 @@ $ python3 train.py --img-size 640 --batch-size 16 --epochs 300 --data ./data/sco
 
 <img width="1000" align="center" alt="Screen Shot 2020-04-01 at 11 44 26 AM" src="./readmepic/readme2/pic/results.png">
 
-#### 7.推断
+#### 6.推断
 
 ```python
-$ python3 detect.py --source file.jpg  # image 
+$ python detect.py --source file.jpg  # image 
                             file.mp4  # video
                             ./dir  # directory
                             0  # webcam
@@ -216,12 +165,12 @@ $ python3 detect.py --source file.jpg  # image
 
 ```python
 # inference  /home/myuser/xujing/EfficientDet-Pytorch/dataset/test/ 文件夹下的图像
-$ python3 detect.py --source /home/myuser/xujing/EfficientDet-Pytorch/dataset/test/ --weights weights/best.pt --conf 0.1
+$ python detect.py --source /home/myuser/xujing/EfficientDet-Pytorch/dataset/test/ --weights weights/best.pt --conf 0.1
 
-$ python3 detect.py --source ./inference/images/ --weights weights/yolov5x.pt --conf 0.5
+$ python detect.py --source ./inference/images/ --weights weights/yolov5x.pt --conf 0.5
 
 # inference  视频
-$ python3 detect.py --source test.mp4 --weights weights/yolov5x.pt --conf 0.4
+$ python detect.py --source test.mp4 --weights weights/yolov5x.pt --conf 0.4
 ```
 
 <img width="1000" align="center" alt="Screen Shot 2020-04-01 at 11 44 26 AM" src="./readmepic/readme2/pic/t1.jpg">
@@ -234,3 +183,5 @@ $ python3 detect.py --source test.mp4 --weights weights/yolov5x.pt --conf 0.4
 [1].https://github.com/ultralytics/yolov5
 
 [2].https://github.com/ultralytics/yolov5/wiki/Train-Custom-Data
+
+[3].https://github.com/DataXujing/YOLO-v5
